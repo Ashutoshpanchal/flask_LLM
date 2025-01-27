@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, Response,stream_with_context
 # from llama_cpp import Llama
-from mx_lm import load_model,create_text,create_text_stream
+from mx_lm import load_model,create_text,create_text_stream,get_model_info
 # ANSI escape code for colors
 PINK = '\033[95m'
 CYAN = '\033[96m'
@@ -32,6 +32,11 @@ def v1_generate_stream():
     prompt = f"### Instruction:\n{instruction}\n### Query:\n{query}\n### Response:\n"
 
     return Response(stream_with_context(create_text_stream(tokenizer, model, prompt)), mimetype="text/event-stream")
+
+@app.route('/', methods=['GET'])
+def index():
+    info = get_model_info(model, tokenizer)
+    return jsonify(info)
 
 # if __name__ == '__main__':
 #     app.run(debug=True, port=5005)
