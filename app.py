@@ -33,7 +33,7 @@ def v1_generate_stream():
 
     return Response(stream_with_context(create_text_stream(tokenizer, model, prompt)), mimetype="text/event-stream")
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5005)
+# if __name__ == '__main__':
+#     app.run(debug=True, port=5005)
 
 
