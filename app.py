@@ -38,7 +38,7 @@ def index():
     info = get_model_info(model, tokenizer)
     return jsonify(info)
 
-# if __name__ == '__main__':
-#     app.run(debug=True, port=5005)
+if __name__ == '__main__':
+    app.run(debug=True, port=5005)
 
 
