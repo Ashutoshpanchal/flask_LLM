@@ -3,7 +3,8 @@ from mlx_lm import load, generate,stream_generate
 
 
 def load_model():
-    model, tokenizer = load("/Users/ashutoshpanchal/.lmstudio/models/mlx-community/Llama-3.2-3B-Instruct-4bit/")
+    # model, tokenizer = load("/Users/ashutoshpanchal/.lmstudio/models/mlx-community/Llama-3.2-3B-Instruct-4bit/")
+    model, tokenizer = load("mlx-community/Llama-3.2-3B-Instruct-4bit")
     return model, tokenizer
 
 def create_text(tokenizer, model, prompt):
