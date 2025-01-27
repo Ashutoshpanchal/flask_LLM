@@ -11,24 +11,21 @@ llm = None
 
 def load_model():
     global llm
-    try:
-        model_path = "/Users/ashutoshpanchal/.lmstudio/models/chiizaraa/Llama-3.2-1B-Instruct-Q4_K_M-GGUF/llama-3.2-1b-instruct-q4_k_m.gguf"
-        
-        app.logger.info(f"Loading model from {model_path}...")
-        
-        llm = Llama(
-            model_path=model_path,
-            n_ctx=4096,          # Context window size
-            n_gpu_layers=-1,     # -1 = all layers to GPU
-            n_threads=8,         # CPU threads
-            verbose=False
-        )
-        
-        app.logger.info("Model loaded successfully")
-        
-    except Exception as e:
-        app.logger.error(f"Model loading failed: {str(e)}")
-        raise
+    
+    model_path = "/home/magenta/.cache/huggingface/hub/models--chiizaraa--Llama-3.2-1B-Instruct-Q4_K_M-GGUF/snapshots/d6fc1de754cf625e9cefdf3da24767bd3c8717c4/llama-3.2-1b-instruct-q4_k_m.gguf"
+    
+    app.logger.info(f"Loading model from {model_path}...")
+    
+    llm = Llama(
+        model_path=model_path,
+        n_ctx=4096,          # Context window size
+        n_gpu_layers=-1,     # -1 = all layers to GPU
+        n_threads=8,         # CPU threads
+        verbose=False
+    )
+    
+    app.logger.info("Model loaded successfully")
+
 load_model()
 
 
@@ -62,15 +59,12 @@ def generate_text():
 
 @app.route('/generate_stream', methods=['POST'])
 def generate_stream():
-    if not llm:
-        return jsonify({"error": "Model not loaded"}), 500
+
     
-    try:
         data = request.get_json()
-        prompt = data.get('prompt')
-        
-        if not prompt:
-            return jsonify({"error": "Prompt is required"}), 400
+        instruction = data.get('i', '')
+        query = data.get('q', '')
+        prompt = f"### Instruction:\n{instruction}\n### Query:\n{query}\n### Response:\n"
         
         messages = [{"role": "user", "content": prompt}]
 
@@ -88,12 +82,9 @@ def generate_stream():
                     yield chunk['choices'][0]['delta']['content']
 
         return Response(generator(), mimetype='text/plain')
-    
-    except Exception as e:
-        app.logger.error(f"Streaming error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
 
-@app.route('/model_info', methods=['GET'])
+
+@app.route('/', methods=['GET'])
 def model_info():
     if not llm:
         return jsonify({"error": "Model not loaded"}), 500
