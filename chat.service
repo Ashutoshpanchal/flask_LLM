@@ -1,0 +1,48 @@
+
+[Unit]
+Description=Gunicorn Service for Python App
+After=network.target
+
+[Service]
+Type=simple
+User=magenta
+WorkingDirectory=/home/flask_LLM/
+ExecStart=/usr/bin/python3 -m gunicorn --preload -w 1 --threads 4 -b 0.0.0.0:5005 app:app
+Restart=on-failure
+RestartSec=60s
+Environment="PATH=/home/magenta/magentabibe/venv/bin:/usr/bin"
+
+[Install]
+WantedBy=multi-user.target
+#-----------
+server {
+    server_name chat.magenta-bi.com;
+
+    location / {
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_set_header   Host $host;
+        proxy_pass         "http://127.0.0.1:5005";
+    }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/chat.magenta-bi.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/chat.magenta-bi.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = chat.magenta-bi.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name chat.magenta-bi.com;
+    return 404;  # managed by Certbot
+
+
+}

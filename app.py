@@ -33,6 +33,9 @@ def v1_generate_stream():
 
     return Response(stream_with_context(create_text_stream(tokenizer, model, prompt)), mimetype="text/event-stream")
 
+
+
+
 @app.route('/', methods=['GET'])
 def index():
     info = get_model_info(model, tokenizer)

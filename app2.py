@@ -12,7 +12,8 @@ llm = None
 def load_model():
     global llm
     
-    model_path = "/home/magenta/.cache/huggingface/hub/models--chiizaraa--Llama-3.2-1B-Instruct-Q4_K_M-GGUF/snapshots/d6fc1de754cf625e9cefdf3da24767bd3c8717c4/llama-3.2-1b-instruct-q4_k_m.gguf"
+    # model_path = "/home/magenta/.cache/huggingface/hub/models--chiizaraa--Llama-3.2-1B-Instruct-Q4_K_M-GGUF/snapshots/d6fc1de754cf625e9cefdf3da24767bd3c8717c4/llama-3.2-1b-instruct-q4_k_m.gguf"
+    model_path="/Users/ashutoshpanchal/.lmstudio/models/chiizaraa/Llama-3.2-1B-Instruct-Q4_K_M-GGUF/llama-3.2-1b-instruct-q4_k_m.gguf"
     
     app.logger.info(f"Loading model from {model_path}...")
     
