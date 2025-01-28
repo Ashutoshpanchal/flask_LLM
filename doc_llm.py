@@ -5,13 +5,13 @@ from sentence_transformers import SentenceTransformer
 from mlx_lm import load, generate
 
 # === Step 1: Load and Clean Data ===
-def load_txt_data(file):
+def load_txt_data(file_path):
     """
     Load and clean text data from a .txt file.
     """
-    content = file.read().decode('utf-8')  # Read and decode the content
-    lines = content.splitlines()  # Split into lines
-    cleaned_data = [line.strip() for line in lines if line.strip()]  # Clean and remove empty lines
+    with open(file_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+    cleaned_data = [line.strip() for line in lines if line.strip()]
     return cleaned_data
 
 
@@ -92,45 +92,45 @@ def create_text(tokenizer, model, prompt):
     return text
 
 # === Step 5: Full Workflow ===
-if __name__ == "__main__":
-    # Path to your data file
-    file_path = "/Users/ashutoshpanchal/Desktop/Project/project/flask_LLM/snapview.txt"  # Replace with the correct .txt file path
-    INDEX_FILE_PATH = 'faiss_index.index'
+# if __name__ == "__main__":
+#     # Path to your data file
+#     file_path = "/Users/ashutoshpanchal/Desktop/Project/project/flask_LLM/snapview.txt"  # Replace with the correct .txt file path
+#     INDEX_FILE_PATH = 'faiss_index.index'
 
-    # Load and clean data
-    print("Loading and cleaning data...")
-    raw_data = load_txt_data(file_path)
-    cleaned_data = split_text_into_chunks(raw_data)
+#     # Load and clean data
+#     print("Loading and cleaning data...")
+#     raw_data = load_txt_data(file_path)
+#     cleaned_data = split_text_into_chunks(raw_data)
 
-    # Initialize embedding model
-    print("Generating embeddings...")
-    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-    embeddings = generate_embeddings(cleaned_data, embedding_model)
+#     # Initialize embedding model
+#     print("Generating embeddings...")
+#     embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+#     embeddings = generate_embeddings(cleaned_data, embedding_model)
 
-    # Initialize FAISS and store embeddings
-    vector_dim = embeddings[0].shape[0]
-    faiss_index = initialize_faiss(vector_dim)
-    faiss_index = store_embeddings_in_faiss(cleaned_data, embeddings, faiss_index)
-    save_faiss_index(faiss_index)
-    print("Embeddings stored in FAISS!")
+#     # Initialize FAISS and store embeddings
+#     vector_dim = embeddings[0].shape[0]
+#     faiss_index = initialize_faiss(vector_dim)
+#     faiss_index = store_embeddings_in_faiss(cleaned_data, embeddings, faiss_index)
+#     save_faiss_index(faiss_index)
+#     print("Embeddings stored in FAISS!")
 
-    # Load Llama model
-    model, tokenizer = load_model()
+#     # Load Llama model
+#     model, tokenizer = load_model()
 
-    # Simulate user query
-    user_query = "How do I change the period?"  # Replace with the user's query
+#     # Simulate user query
+#     user_query = "How do I change the period?"  # Replace with the user's query
 
-    # Retrieve relevant context from FAISS
-    print("Retrieving relevant context...")
-    retrieved_context = query_faiss(faiss_index, embedding_model, user_query, cleaned_data, k=3)
-    context = " ".join(retrieved_context)  # Combine retrieved chunks
+#     # Retrieve relevant context from FAISS
+#     print("Retrieving relevant context...")
+#     retrieved_context = query_faiss(faiss_index, embedding_model, user_query, cleaned_data, k=3)
+#     context = " ".join(retrieved_context)  # Combine retrieved chunks
 
-    # Generate response from the model
-    print("Generating response from the model...")
-    prompt = create_prompt(context, user_query)
-    response = create_text(tokenizer, model, prompt)
+#     # Generate response from the model
+#     print("Generating response from the model...")
+#     prompt = create_prompt(context, user_query)
+#     response = create_text(tokenizer, model, prompt)
 
-    # Output the response
-    print("\n==========")
-    print("Model Response:")
-    print(response)
+#     # Output the response
+#     print("\n==========")
+#     print("Model Response:")
+#     print(response)
