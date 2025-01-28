@@ -2,12 +2,42 @@ from flask import Flask, request, jsonify, Response
 from llama_cpp import Llama
 import logging
 from typing import Generator
+import numpy as np
+import os
+import faiss
+from doc_llm import (load_txt_data, split_text_into_chunks, initialize_faiss,
+                      generate_embeddings, store_embeddings_in_faiss)
+from sentence_transformers import SentenceTransformer
+
 
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 import json
 # Global model instance
 llm = None
+
+
+INDEX_FILE_PATH = 'faiss_index.index'
+
+# Function to create or load the FAISS index
+def create_or_load_faiss_index(dimension):
+    if os.path.exists(INDEX_FILE_PATH):
+        # If the index file exists, load it
+        index = faiss.read_index(INDEX_FILE_PATH)
+        print(f"Loaded existing FAISS index from {INDEX_FILE_PATH}")
+    else:
+        # Otherwise, create a new index
+        index = faiss.IndexFlatL2(dimension)  # L2 distance (Euclidean distance)
+        print(f"Created a new FAISS index")
+    return index
+
+# Function to save the FAISS index
+def save_faiss_index(index):
+    faiss.write_index(index, INDEX_FILE_PATH)
+    print(f"Saved FAISS index to {INDEX_FILE_PATH}")
+
+
+
 
 def load_model():
     global llm
@@ -100,6 +130,10 @@ def generate_stream():
         return Response(generator(), mimetype='text/plain')
 
 
+
+
+
+
 @app.route('/', methods=['GET'])
 def model_info():
     if not llm:
@@ -116,6 +150,43 @@ def model_info():
     except Exception as e:
         app.logger.error(f"Model info error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/upload-txt', methods=['POST'])
+def upload_txt():
+        # Check if a file is provided in the request
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part"}), 400
+        
+        # Get the file from the request
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+        
+        # Read the .txt file content
+
+        raw_data = load_txt_data(file)
+        cleaned_data = split_text_into_chunks(raw_data)
+
+        # Initialize embedding model
+        print("Generating embeddings...")
+        embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+        embeddings = generate_embeddings(cleaned_data, embedding_model)
+
+        # Initialize FAISS and store embeddings
+        vector_dim = embeddings[0].shape[0]
+        faiss_index = initialize_faiss(vector_dim)
+        faiss_index = store_embeddings_in_faiss(cleaned_data, embeddings, faiss_index)
+        print("Embeddings stored in FAISS!")
+
+        # Save the updated FAISS index
+        save_faiss_index(faiss_index)
+
+        return jsonify({"message": "File uploaded and FAISS index updated successfully."}), 200
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5005, threaded=True)
