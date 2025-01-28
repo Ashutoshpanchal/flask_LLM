@@ -5,13 +5,13 @@ from sentence_transformers import SentenceTransformer
 from mlx_lm import load, generate
 
 # === Step 1: Load and Clean Data ===
-def load_txt_data(file_path):
+def load_txt_data(file):
     """
     Load and clean text data from a .txt file.
     """
-    with open(file_path, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
-    cleaned_data = [line.strip() for line in lines if line.strip()]
+    content = file.read().decode('utf-8')  # Read and decode the content
+    lines = content.splitlines()  # Split into lines
+    cleaned_data = [line.strip() for line in lines if line.strip()]  # Clean and remove empty lines
     return cleaned_data
 
 
